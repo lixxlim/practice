@@ -6,3 +6,5 @@ build/*
 # python
 .env
 .venv/*
+.flask/*
+.vanila/*
