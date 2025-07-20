@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Upload</title>
+</head>
+<body>
+<a href="/download">Move to download page</a>
+<hr/>
+<h1>File upload</h1>
+
+<form method="post" enctype="multipart/form-data" th:action="@{/upload}">
+    <input type="file" name="file"/>
+    <button type="submit">Upload</button>
+</form>
+
+<hr/>
+
+<h2>Uploaded List</h2>
+<table>
+    <thead>
+    <tr>
+        <th>File name</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="file : ${files}">
+        <td th:text="${file}"></td>
+        <td>
+            <form method="post" th:action="@{/upload/delete}" style="display:inline;">
+                <input type="hidden" name="filename" th:value="${file}" />
+                <button type="submit" onclick="return confirm('Do you want to delete?');">Delete</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<hr/>
+<p th:text="${message}"></p>
+
+</body>
+</html>
