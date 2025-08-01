@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a th:href="@{/}">Home</a></li>
+                <li><a th:href="@{/about}">About</a></li>
+                <li><a th:href="@{/contact}">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Content Section -->
+        <section>
+            <p>about page</p>
+            <h1 th:text="${pageTitle}">Default Title</h1>
+            <div th:if="${message}" th:text="${message}"></div>
+
+            <!-- Iteration Example -->
+            <div th:each="item : ${items}">
+                <p th:text="${item.name}">Item Name</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p th:text="'© ' + ${#dates.year(#dates.createNow())} + ' Your Company Name'"></p>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+</body>
+</html>
+

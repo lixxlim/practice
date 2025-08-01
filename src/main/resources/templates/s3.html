@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S3 File Manager</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .dropzone {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #ccc;
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .dropzone.dragover {
+            background-color: #e1e1e1;
+            border-color: #999;
+        }
+        .file-list {
+            margin: 20px 0;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a th:href="@{/}">Home</a></li>
+                <li><a th:href="@{/about}">About</a></li>
+                <li><a th:href="@{/contact}">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h1>S3 File Manager</h1>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div id="dropzone" class="dropzone">
+                    <p>Drag and drop files here or</p>
+                    <input type="file" id="fileInput" multiple style="display: none">
+                    <button onclick="document.getElementById('fileInput').click()">Select Files</button>
+                </div>
+            </div>
+
+            <!-- File List Section -->
+            <div class="file-list">
+                <h2>Files in S3</h2>
+                <div th:each="file : ${s3Files}" class="file-item">
+                    <span th:text="${file.name}">filename.txt</span>
+                    <span th:text="${file.size}">1.2 MB</span>
+                    <span th:text="${file.lastModified}">2023-12-25</span>
+                    <button th:onclick="'downloadFile(\'' + ${file.key} + '\')'">Download</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p th:text="'© ' + ${#dates.year(#dates.createNow())} + ' Your Company Name'"></p>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+    <script>
+        const dropzone = document.getElementById('dropzone');
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        // Highlight drop zone when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+
+        // Handle dropped files
+        dropzone.addEventListener('drop', handleDrop, false);
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight(e) {
+            dropzone.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            dropzone.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            ([...files]).forEach(uploadFile);
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(success => {
+                // Refresh file list after successful upload
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function downloadFile(key) {
+            window.location.href = '/api/download?key=' + encodeURIComponent(key);
+        }
+    </script>
+</body>
+</html>
