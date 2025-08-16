@@ -1,7 +1,36 @@
+import com.github.gradle.node.npm.task.NpmTask
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id "com.github.node-gradle.node" version "7.0.1" // node plugin
+}
+
+node {
+	version = "22.17.0"        // Node.js version
+	npmVersion = "11.4.2"      // npm version
+	download = true            // auto download
+	nodeProjectDir = file("${projectDir}/react") // React project path
+}
+
+// React 빌드
+tasks.register("buildFrontend", NpmTask) {
+	dependsOn("npmInstall")
+	args = ["run", "build"]
+	workingDir = file("${projectDir}/react")
+}
+
+// 빌드 결과 복사
+tasks.register("copyFrontend", Copy) {
+	dependsOn("buildFrontend")
+	from("${projectDir}/react/dist")
+	into("${projectDir}/src/main/resources/static")
+}
+
+// processResources 전에 실행되도록 연결
+tasks.named("processResources") {
+	dependsOn("copyFrontend")
 }
 
 group = 'com.lixlim'
@@ -25,11 +54,15 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.5.4'
+	implementation 'com.h2database:h2:2.3.232'
+	implementation 'org.postgresql:postgresql:42.7.7'
 }
 
 tasks.named('test') {
