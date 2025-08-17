@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'checkstyle'
 }
 
 group = 'com.lixlim'
@@ -30,6 +31,21 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+checkstyle {
+	toolVersion = '10.25.0'
+	configFile = file("config/checkstyle/checkstyle.xml")
+}
+
+tasks.withType(Checkstyle).configureEach {
+	classpath = files()
+}
+
+['check', 'bootRun', 'bootJar', 'compileJava'].forEach { taskName ->
+	tasks.named(taskName) {
+		dependsOn 'checkstyleMain'
+	}
 }
 
 tasks.named('test') {
